@@ -1,13 +1,13 @@
 # --- ENux Setup Phase 1: Customization and Bedrock Hijack ---
 # This script must be run as root after the base Debian install is complete.
-# ASSUMPTION: This script (and its companion files) is being executed from the user's desktop/home directory.
-WALLPAPER_FILE
-="$HOME/enux-wallpaper.jpg"
-PHASE2_SCRIPT="$HOME/enux-setup-phase2.sh"
+# It performs system customization and the irreversible Bedrock Linux hijack.
+WALLPAPER_FILE="$HOME/enux-wallpaper.jpg"
+PHASE2_SCRIPT="$HOME/Desktop/phase2.sh" # Phase 2 is now visible on the Desktop
+PHASE2_TARGET_NAME="phase2.sh" # The name for the file saved in /root
 FASTFETCH_CONFIG_DIR="/etc/fastfetch"
 FASTFETCH_CONFIG_FILE="$FASTFETCH_CONFIG_DIR/config.jsonc"
 BEDROCK_VERSION="0.7.30"
-BEDROCK_URL="https://github.com/bedrocklinux/bedrocklinux-userland/releases/download/0.7.30/bedrock-linux-0.7.30-x86_64.sh"
+BEDROCK_URL="https://github.com/bedrocklinux/bedrocklinux-userland/releases/download/$BEDROCK_VERSION/bedrock-linux-$BEDROCK_VERSION-x86_64.sh"
 
 echo "==============================================="
 echo " ENux Phase 1: Customization and Bedrock Hijack"
@@ -74,7 +74,6 @@ echo "    -> Fastfetch configuration customized."
 echo "--> 3/5: Setting system-wide ENux wallpaper defaults..."
 if [ -f "$WALLPAPER_FILE" ]; then
     mkdir -p /usr/share/backgrounds
-    # Copy from user's home directory (where it landed from /etc/skel) to system directory
     cp "$WALLPAPER_FILE" /usr/share/backgrounds/enux-wallpaper.jpg
     WALLPAPER_PATH="/usr/share/backgrounds/enux-wallpaper.jpg"
     echo "    -> Wallpaper copied to $WALLPAPER_PATH."
@@ -119,33 +118,30 @@ wget "$BEDROCK_URL" -O /tmp/bedrock-install.sh
 chmod +x /tmp/bedrock-install.sh
 
 echo "--> Executing Bedrock Hijack (Responding 'Not reversible!' automatically)..."
-# The yes command pipes the confirmation string to automate the hijack.
 yes "Not reversible!" | /tmp/bedrock-install.sh --hijack
 
 # --- 5/5: Prepare and Reboot ---
 echo "--> 5/5: Preparing for Phase 2 and Reboot..."
 if [ -f "$PHASE2_SCRIPT" ]; then
-    # Copy from user's home directory (where it landed from /etc/skel) to /root/
-    cp "$PHASE2_SCRIPT" /root/"$PHASE2_SCRIPT"
-    chmod +x /root/"$PHASE2_SCRIPT"
-    echo "    -> Phase 2 script saved to /root/$PHASE2_SCRIPT."
+    # Copy Phase 2 script from its Desktop location to /root/
+    cp "$PHASE2_SCRIPT" "/root/$PHASE2_TARGET_NAME"
+    chmod +x "/root/$PHASE2_TARGET_NAME"
+    echo "    -> Phase 2 script saved to /root/$PHASE2_TARGET_NAME."
     
-    # Cleanup Phase 2 script from user's home directory/desktop
-    rm -f "$PHASE2_SCRIPT"
-    echo "    -> Cleaned up enux-setup-phase2.sh from user home."
+    # NOTE: Phase 2 is NO LONGER deleted from the desktop here.
 else
     echo "    -> ERROR: Phase 2 script '$PHASE2_SCRIPT' not found. Cannot proceed."
 fi
 
 # Cleanup
 rm -f /tmp/bedrock-install.sh
-# Also clean up the Phase 1 script after it has finished running
-rm -f "$0"
+# NOTE: Phase 1 script (which is $0) is NO LONGER deleted here.
+echo "    -> NOTE: phase1.sh and phase2.sh icons remain on the desktop for user convenience."
 
 echo "==============================================="
 echo " SUCCESS! Bedrock Hijack is complete."
 echo " The system needs to reboot now to finalize."
-echo " After reboot, log in as root and run /root/$PHASE2_SCRIPT"
+echo " After reboot, log in as root and run /root/$PHASE2_TARGET_NAME"
 echo "==============================================="
 
 read -p "Press Enter to reboot now, or Ctrl+C to cancel and reboot manually later."
